@@ -3,7 +3,10 @@ const config = require('./config.js');
 
 console.log(config);
 
-var lastPost = Date.now();
+var lastPost = {};
+for (channel of config.tmi_opts.channels) {
+  lastPost['#' + channel] = Date.now();
+}
 
 const postEmote = function (channel, prefix) {
     let msg = config.bot_opts.emote;
@@ -12,14 +15,14 @@ const postEmote = function (channel, prefix) {
         msg = `${prefix.trim()} ${msg}`;
     }
 
-    lastPost = Date.now();
+    lastPost[channel] = Date.now();
     client.say(channel, msg);
 
     console.log('* Emote posted', channel, prefix);
 };
 
-const getNextAutoPost = function () {
-    return lastPost
+const getNextAutoPost = function (channel) {
+    return lastPost[channel]
                + (config.bot_opts.autoPostDelay
                      + Math.floor(Math.random() * config.bot_opts.autoPostRngDelay)
                      - (config.bot_opts.autoPostRngDelay / 2));
@@ -29,13 +32,13 @@ const autoPostLoop = function (channel) {
         return;
     }
 
-    if (Date.now() >= getNextAutoPost()) {
+    if (Date.now() >= getNextAutoPost(channel)) {
         postEmote(channel);
     }
 
-    setTimeout(autoPostLoop.bind(this, channel), getNextAutoPost() - Date.now() - 100);
+    setTimeout(autoPostLoop.bind(this, channel), getNextAutoPost(channel) - Date.now() + 10);
 
-    console.log('* Auto post sheduled', channel, getNextAutoPost() - Date.now() - 100);
+    console.log('* Auto post sheduled', channel, getNextAutoPost(channel) - Date.now() + 10);
 };
 
 
