@@ -1,0 +1,30 @@
+var config = module.exports = {};
+
+
+// See also https://docs.tmijs.org/v1.1.1/Configuration.html
+// for more information on tmi configuration options
+config.tmi_opts = {
+    "identity": {
+        // Username of the bot (so likely I_only_post_<emotename>)
+        "username": "",
+        // OAuth token, for lazy mode you can use https://twitchapps.com/tmi/
+        "password": ""
+    },
+    "channels": [
+        // Channels the bot should connect to
+        ""
+    ]
+};
+
+
+// Configuration of the emote bot options
+config.bot_opts = {
+    // The actual emote name
+    "emote": "missde5Sup",
+    // Whether to periodically post the emote to the connected channels
+    "autoPost": true,
+    // The interval *in milliseconds* to post the emote automatically
+    "autoPostDelay": 5 * 60 * 1e3,
+    // A delay *in milliseconds* to delay the interval by, 0 for no random delay in between periodic automatic posts
+    "autoPostRngDelay": 60 * 1e3
+};
