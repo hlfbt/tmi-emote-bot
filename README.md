@@ -25,3 +25,4 @@ Copy `config.js.dist` to `config.js` and set values accordingly.
 * only post automatically if the channel is live
 * the autopost code is probably crap
 * actually most of the code is crap
+* make bot config channel dependent with global defaults
