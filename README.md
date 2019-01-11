@@ -24,3 +24,4 @@ Copy `config.js.dist` to `config.js` and set values accordingly.
 * ![missde5Sup](https://static-cdn.jtvnw.net/emoticons/v1/1750968/1.0 "missde5Sup")
 * only post automatically if the channel is live
 * the autopost code is probably crap
+* actually most of the code is crap
