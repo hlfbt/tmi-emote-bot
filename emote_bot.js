@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const tmi = require('tmi.js');
 const config = require('./config.js');
 
