@@ -7,10 +7,10 @@ The bot only posts the one emote it is configured for.
 It replies to any mentions with the emote. It also greets all subs with the amount of months they (re)subbed!
 The bot can also periodically post the emote automatically.
 
+The bot uses [tmi.js][tmijs] to interface with twitch.
+
 
 ## Installation
-
-The bot uses [tmi.js][tmijs] to interface with twitch.
 
 Simply run
 ```shell
@@ -21,7 +21,7 @@ to install all required NPM packages.
 
 ## Running
 
-To start the bot, just start the script with node:
+To start the bot, just start the script with node
 ```shell
 node emote_bot.js
 ```
