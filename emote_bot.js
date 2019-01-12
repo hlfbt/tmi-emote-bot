@@ -46,11 +46,13 @@ const autoPostLoop = function (channel) {
 
 const client = new tmi.client(config.tmi_opts);
 
-client.on('message', onMessageHandler);
-client.on('subscription', onSubHandler);
-client.on('resub', onSubHandler);
 client.on('connected', onConnectedHandler);
 client.on('notice', onNoticeHandler);
+client.on('message', onMessageHandler);
+if (config.bot_opts.greetSubs) {
+    client.on('subscription', onSubHandler);
+    client.on('resub', onSubHandler);
+}
 
 client.connect();
 

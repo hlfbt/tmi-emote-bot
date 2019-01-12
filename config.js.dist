@@ -24,7 +24,9 @@ config.bot_opts = {
     // Whether to periodically post the emote to the connected channels
     "autoPost": true,
     // The interval *in milliseconds* to post the emote automatically
-    "autoPostDelay": 5 * 60 * 1e3,
+    "autoPostDelay": 10 * 60 * 1e3,
     // A delay *in milliseconds* to delay the interval by, 0 for no random delay in between periodic automatic posts
-    "autoPostRngDelay": 60 * 1e3
+    "autoPostRngDelay": 2 * 60 * 1e3,
+    // Whether to post when someone (re-) subscribes, mentioning them
+    "greetSubs": true
 };
