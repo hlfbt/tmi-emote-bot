@@ -1,0 +1,28 @@
+{
+  "name": "tmi-emote-bot",
+  "version": "1.0.0",
+  "description": "tmi.js based I_only_post_TwitchEmote kind of bot",
+  "main": "emote_bot.js",
+  "dependencies": {
+    "tmi.js": "^1.2.1",
+    "winston": "^3.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tubersan/tmi-emote-bot.git"
+  },
+  "keywords": [
+    "tmi.js",
+    "twitch",
+    "emote"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tubersan/tmi-emote-bot/issues"
+  },
+  "homepage": "https://github.com/tubersan/tmi-emote-bot#readme"
+}
