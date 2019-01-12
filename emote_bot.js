@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 
 const tmi = require('tmi.js');
+const log = require('./log.js');
 const config = require('./config.js');
-
-console.log(config);
 
 var lastPost = {};
 for (channel of config.tmi_opts.channels) {
@@ -20,7 +19,7 @@ const postEmote = function (channel, prefix) {
     lastPost[channel] = Date.now();
     client.say(channel, msg);
 
-    console.log('* Emote posted', channel, prefix);
+    log.logger.info(`Emote posted to ${channel} with prefix '${prefix}'`);
 };
 
 const getNextAutoPost = function (channel) {
@@ -38,9 +37,10 @@ const autoPostLoop = function (channel) {
         postEmote(channel);
     }
 
-    setTimeout(autoPostLoop.bind(this, channel), getNextAutoPost(channel) - Date.now() + 10);
+    let timeout = getNextAutoPost(channel) - Date.now() + 10;
+    setTimeout(autoPostLoop.bind(this, channel), timeout);
 
-    console.log('* Auto post sheduled', channel, getNextAutoPost(channel) - Date.now() + 10);
+    log.logger.info(`Auto post sheduled for ${channel} in ${timeout}ms`);
 };
 
 
@@ -50,6 +50,7 @@ client.on('message', onMessageHandler);
 client.on('subscription', onSubHandler);
 client.on('resub', onSubHandler);
 client.on('connected', onConnectedHandler);
+client.on('notice', onNoticeHandler);
 
 client.connect();
 
@@ -63,6 +64,7 @@ const containsMention = function (msg) {
 };
 
 const getUserFromState = function (userstate, fallback) {
+    log.event.debug('[method] getUserFromState', userstate, fallback);
     if (typeof userstate === 'object'
             && 'display-name' in userstate
             && userstate['display-name']) {
@@ -77,7 +79,7 @@ const getUserFromState = function (userstate, fallback) {
 }
 
 function onMessageHandler(channel, userstate, msg, self) {
-    //console.log('* Message received', channel, msg, self, userstate);
+    log.event.info('[message]', channel, msg, self, userstate);
 
     if (self) {
         return;
@@ -93,14 +95,16 @@ function onMessageHandler(channel, userstate, msg, self) {
 }
 
 function onSubHandler(channel, username, months, msg, userstate, method) {
-    console.log('* Subscription', channel, username, msg, months, userstate);
+    let resub = typeof months === "number";
+
+    log.event.info(resub ? '[resub]' : '[subscription]', channel, username, msg, months, userstate);
 
     if (username.toLowerCase() === config.tmi_opts.identity.username.toLowerCase()) {
         return;
     }
 
     let prefix = '';
-    if (typeof months === "number") {
+    if (resub) {
         prefix = config.bot_opts.emote + ' ';
         prefix = prefix.repeat(months - 1).trim();
     } else if (typeof months === "object") {
@@ -113,9 +117,14 @@ function onSubHandler(channel, username, months, msg, userstate, method) {
 }
 
 function onConnectedHandler(addr, port) {
-    console.log(`* Connected to ${addr}:${port}`);
+    log.event.info('connected to twitch', addr, port);
+    log.logger.info(`Connected to ${addr}:${port}`);
 
     for (channel of config.tmi_opts.channels) {
         autoPostLoop(channel);
     }
+}
+
+function onNoticeHandler(channel, msgid, message) {
+    log.event.debug(`[notice] ${msgid}`, ...arguments);
 }
