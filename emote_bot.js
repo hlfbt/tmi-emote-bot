@@ -91,7 +91,7 @@ function onMessageHandler(channel, userstate, msg, self) {
         return;
     }
 
-    if (containsMention(msg)) {
+    if (config.bot_opts.replyMentions && containsMention(msg)) {
         postEmote(channel, getUserFromState(userstate, userstate['username']));
     }
 }

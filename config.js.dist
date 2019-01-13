@@ -28,5 +28,7 @@ config.bot_opts = {
     // A delay *in milliseconds* to delay the interval by, 0 for no random delay in between periodic automatic posts
     "autoPostRngDelay": 2 * 60 * 1e3,
     // Whether to post when someone (re-) subscribes, mentioning them
-    "greetSubs": true
+    "greetSubs": true,
+    // Whether to reply to any mentions (@botname or just botname in message)
+    "replyMentions": true
 };

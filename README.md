@@ -43,6 +43,8 @@ Copy `config.js.dist` to `config.js` and set values accordingly.
 * `autoPost`: whether to automatically periodically post the emote to all connected channels
 * `autoPostDelay`: the automatic posting interval delay in milliseconds
 * `autoPostRngDelay`: set to greater than 0 if the periodic interval delay should further be delayed by a random range of +/- `autoPostRngDelay / 2`
+* `greetSubs`: whether to greet (re-) subscriptions with as many emotes as months that they subscribed
+* `replyMentions`: whether to reply to any mentions with the emote
 
 
 ## TODOs
