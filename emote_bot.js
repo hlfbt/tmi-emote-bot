@@ -51,7 +51,7 @@ client.on('notice', onNoticeHandler);
 client.on('message', onMessageHandler);
 if (config.bot_opts.greetSubs) {
     client.on('subscription', onSubHandler);
-    client.on('resub', onSubHandler);
+    client.on('resub', onResubHandler);
 }
 
 client.connect();
@@ -66,7 +66,14 @@ const containsMention = function (msg) {
 };
 
 const getUserFromState = function (userstate, fallback) {
-    log.event.debug('[method] getUserFromState', userstate, fallback);
+    log.event.debug('getUserFromState', {
+        label: 'method',
+        arguments: {
+            userstate: userstate,
+            fallback: fallback
+        }
+    });
+
     if (typeof userstate === 'object'
             && 'display-name' in userstate
             && userstate['display-name']) {
@@ -81,7 +88,15 @@ const getUserFromState = function (userstate, fallback) {
 }
 
 function onMessageHandler(channel, userstate, msg, self) {
-    log.event.info('[message]', channel, msg, self, userstate);
+    log.event.info(`message received in ${channel}`, {
+        label: 'message',
+        arguments: {
+            channel: channel,
+            userstate: userstate,
+            msg: msg,
+            self: self
+        }
+    });
 
     if (self) {
         return;
@@ -91,35 +106,63 @@ function onMessageHandler(channel, userstate, msg, self) {
         return;
     }
 
-    if (config.bot_opts.replyMentions && containsMention(msg)) {
+    if (config.bot_opts.replyMentions && containsMention(message)) {
         postEmote(channel, getUserFromState(userstate, userstate['username']));
     }
 }
 
-function onSubHandler(channel, username, months, msg, userstate, method) {
-    let resub = typeof months === "number";
-
-    log.event.info(resub ? '[resub]' : '[subscription]', channel, username, msg, months, userstate);
+function onResubHandler(channel, username, months, message, userstate, methods) {
+    log.event.info(`resub in ${channel} by ${username} for ${months} months`, {
+        label: 'resub',
+        arguments: {
+            channel: channel,
+            username: username,
+            months: months,
+            message: message,
+            userstate: userstate,
+            methods: methods
+        }
+    });
 
     if (username.toLowerCase() === config.tmi_opts.identity.username.toLowerCase()) {
         return;
     }
 
-    let prefix = '';
-    if (resub) {
-        prefix = config.bot_opts.emote + ' ';
-        prefix = prefix.repeat(months - 1).trim();
-    } else if (typeof months === "object") {
-        userstate = months;
+    let emoteRepeat = config.bot_opts.emote + ' ';
+    emoteRepeat = emoteRepeat.repeat(months - 1).trim();
+    username = getUserFromState(userstate, username);
+
+    postEmote(channel, `${username} ${emoteRepeat}`);
+}
+
+function onSubHandler(channel, username, methods, message, userstate) {
+    log.event.info(`subscription in ${channel} by ${username}`, {
+        label: 'subscription',
+        arguments: {
+            channel: channel,
+            username: username,
+            methods: methods,
+            message: message,
+            userstate: userstate
+        }
+    });
+
+    if (username.toLowerCase() === config.tmi_opts.identity.username.toLowerCase()) {
+        return;
     }
 
     username = getUserFromState(userstate, username);
 
-    postEmote(channel, `${username} ${prefix}`);
+    postEmote(channel, username);
 }
 
 function onConnectedHandler(addr, port) {
-    log.event.info('connected to twitch', addr, port);
+    log.event.info('connected to twitch', {
+        arguments: {
+            addr: addr,
+            port: port
+        }
+    });
     log.logger.info(`Connected to ${addr}:${port}`);
 
     for (channel of config.tmi_opts.channels) {
@@ -128,5 +171,12 @@ function onConnectedHandler(addr, port) {
 }
 
 function onNoticeHandler(channel, msgid, message) {
-    log.event.debug(`[notice] ${msgid}`, ...arguments);
+    log.event.debug(`notice received: ${msgid}`, {
+        label: 'notice',
+        arguments: {
+            channel: channel,
+            msgid: msgid,
+            message: message
+        }
+    });
 }
