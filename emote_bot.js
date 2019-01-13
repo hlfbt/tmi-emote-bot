@@ -10,14 +10,14 @@ for (channel of config.tmi_opts.channels) {
 }
 
 const postEmote = function (channel, prefix) {
-    let msg = config.bot_opts.emote;
+    let message = config.bot_opts.emote;
 
     if (prefix && typeof prefix === 'string' && prefix.length > 0) {
-        msg = `${prefix.trim()} ${msg}`;
+        message = `${prefix.trim()} ${message}`;
     }
 
     lastPost[channel] = Date.now();
-    client.say(channel, msg);
+    client.say(channel, message);
 
     log.logger.info(`Emote posted to ${channel} with prefix '${prefix}'`);
 };
@@ -57,9 +57,10 @@ if (config.bot_opts.greetSubs) {
 client.connect();
 
 
-const mentionRegex = new RegExp(`(?:^|[\\b@])${config.tmi_opts.identity.username.toLowerCase()}(?:\\b|$)`);
-const containsMention = function (msg) {
-    return !!msg
+const containsMention = function (message) {
+    const mentionRegex = new RegExp(`(?:^|[\\b@])${config.tmi_opts.identity.username.toLowerCase()}(?:\\b|$)`);
+
+    return !!message
                .trim()
                .toLowerCase()
                .match(mentionRegex);
@@ -87,13 +88,13 @@ const getUserFromState = function (userstate, fallback) {
     return '';
 }
 
-function onMessageHandler(channel, userstate, msg, self) {
+function onMessageHandler(channel, userstate, message, self) {
     log.event.info(`message received in ${channel}`, {
         label: 'message',
         arguments: {
             channel: channel,
             userstate: userstate,
-            msg: msg,
+            message: message,
             self: self
         }
     });
