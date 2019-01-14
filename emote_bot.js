@@ -76,6 +76,7 @@ const getUserFromState = function (userstate, fallback) {
     });
 
     if (typeof userstate === 'object'
+            && userstate != null
             && 'display-name' in userstate
             && userstate['display-name']) {
         return '@' + userstate['display-name'];
