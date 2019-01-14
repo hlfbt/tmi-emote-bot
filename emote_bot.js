@@ -6,7 +6,7 @@ const config = require('./config.js');
 
 var lastPost = {};
 for (channel of config.tmi_opts.channels) {
-  lastPost['#' + channel] = Date.now();
+  lastPost['#' + channel.toLowerCase()] = Date.now();
 }
 
 const postEmote = function (channel, prefix) {
