@@ -1,8 +1,29 @@
 #!/usr/bin/env node
 
+const path = require('path');
 const tmi = require('tmi.js');
 const log = require('./log.js');
-const config = require('./config.js');
+
+let configLocation = '';
+let nextIsConfig = false;
+for (let arg of process.argv) {
+    if (nextIsConfig) {
+        configLocation = arg;
+        break;
+    }
+    if (arg === '-c' || arg === '--config') {
+        nextIsConfig = true;
+    }
+    if (arg.indexOf('--config=') === 0) {
+        configLocation = arg.match(/^--config=(.*)$/)[1];
+        break;
+    }
+}
+if (!configLocation) {
+    configLocation = './config.js';
+}
+
+const config = require(path.resolve(configLocation));
 
 var lastPost = {};
 for (channel of config.tmi_opts.channels) {
