@@ -32,7 +32,8 @@ var channelStatus = {};
 for (let channel of config.tmi_opts.channels) {
     channelStatus['#' + channel.toLowerCase()] = {
         lastPost: Date.now(),
-        nextPost: 0
+        nextPost: 0,
+        live: false
     };
 }
 
@@ -66,6 +67,10 @@ const getNextAutoPost = function (channel) {
 
 const autoPostLoop = function (channel) {
     if (!config.bot_opts.autoPost) {
+        return;
+    }
+
+    if (!channelStatus[channel].live) {
         return;
     }
 
@@ -109,7 +114,62 @@ const getUserFromState = function (userstate, fallback) {
     }
 
     return '';
-}
+};
+
+const getChannelInfo = function (channelName, callback) {
+    client.api({
+        url: `https://api.twitch.tv/helix/streams?user_login=${channelName.replace(/^#/, '')}`,
+        method: "GET",
+        headers: {
+            "Authorization": config.tmi_opts.identity.password.replace(/^oauth:/, '')
+        }
+    }, function (err, res, body) {
+        try {
+            body = JSON.parse(body);
+        } catch (e) {}
+
+        log.event.debug('retrieved channel info', {
+            label: 'channelInfo',
+            data: {
+                err: err,
+                res: res,
+                body: body
+            }
+        });
+
+        callback.call(this, err, res, body);
+    });
+};
+
+const liveCheckLoop = function (channel, err, res, body) {
+    if (!config.bot_opts.autoPost) {
+        return;
+    }
+
+    if (typeof body !== 'object' || !('data' in body)) {
+        getChannelInfo(channel, liveCheckLoop.bind(this, channel));
+
+        return;
+    }
+
+    let oldLiveStatus = channelStatus[channel].live;
+    // Twitch API returns an empty array if the stream is not live,
+    // there isn't really a nicer (official) way of checking live status either which is DUMB
+    // Maybe I should just use the official but undocumented GraphQL API instead 😔
+    channelStatus[channel].live = (body.data[0] || { type: '' }).type.toLowerCase() === 'live';
+
+    if (oldLiveStatus !== channelStatus[channel].live) {
+        log.event.info(`channel ${channel} went ${oldLiveStatus ? 'offline' : 'live'}`, {
+            label: 'channelStatus',
+            data: channelStatus[channel]
+        });
+        log.logger.info(`Channel ${channel} went ${oldLiveStatus ? 'OFFLINE' : 'LIVE'}`);
+    }
+
+    let timeout = config.bot_opts.autoPostDelay - (config.bot_opts.autoPostRngDelay / 2);
+    setTimeout(liveCheckLoop.bind(this, channel), timeout);
+};
+
 
 function onMessageHandler(channel, userstate, message, self) {
     log.event.info(`message received in ${channel}`, {
@@ -191,6 +251,7 @@ function onConnectedHandler(addr, port) {
 
     for (let channel of config.tmi_opts.channels) {
         autoPostLoop(channel);
+        liveCheckLoop(channel);
     }
 }
 
