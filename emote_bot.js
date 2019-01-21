@@ -30,7 +30,7 @@ const client = new tmi.client(config.tmi_opts);
 
 var channelStatus = {};
 for (let channel of config.tmi_opts.channels) {
-    channelStatus['#' + channel.toLowerCase()] = {
+    channelStatus[channel.toLowerCase()] = {
         lastPost: Date.now(),
         nextPost: 0,
         live: false
