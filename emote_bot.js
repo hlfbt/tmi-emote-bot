@@ -25,9 +25,15 @@ if (!configLocation) {
 
 const config = require(path.resolve(configLocation));
 
-var lastPost = {};
-for (channel of config.tmi_opts.channels) {
-  lastPost['#' + channel.toLowerCase()] = Date.now();
+const client = new tmi.client(config.tmi_opts);
+
+
+var channelStatus = {};
+for (let channel of config.tmi_opts.channels) {
+    channelStatus['#' + channel.toLowerCase()] = {
+        lastPost: Date.now(),
+        nextPost: 0
+    };
 }
 
 const postEmote = function (channel, prefix) {
@@ -37,18 +43,27 @@ const postEmote = function (channel, prefix) {
         message = `${prefix.trim()} ${message}`;
     }
 
-    lastPost[channel] = Date.now();
+    channelStatus[channel].lastPost = Date.now();
     client.say(channel, message);
 
     log.logger.info(`Emote posted to ${channel} with prefix '${prefix}'`);
 };
 
 const getNextAutoPost = function (channel) {
-    return lastPost[channel]
-               + (config.bot_opts.autoPostDelay
-                     + Math.floor(Math.random() * config.bot_opts.autoPostRngDelay)
-                     - (config.bot_opts.autoPostRngDelay / 2));
+    if (!channelStatus[channel].lastPost) {
+        channelStatus[channel].lastPost = Date.now();
+    }
+
+    if (channelStatus[channel].nextPost < channelStatus[channel].lastPost) {
+        channelStatus[channel].nextPost = channelStatus[channel].lastPost
+            + (config.bot_opts.autoPostDelay
+                + Math.floor(Math.random() * config.bot_opts.autoPostRngDelay)
+                - (config.bot_opts.autoPostRngDelay / 2));
+    }
+
+    return channelStatus[channel].nextPost;
 };
+
 const autoPostLoop = function (channel) {
     if (!config.bot_opts.autoPost) {
         return;
@@ -63,20 +78,6 @@ const autoPostLoop = function (channel) {
 
     log.logger.info(`Auto post sheduled for ${channel} in ${timeout}ms`);
 };
-
-
-const client = new tmi.client(config.tmi_opts);
-
-client.on('connected', onConnectedHandler);
-client.on('notice', onNoticeHandler);
-client.on('message', onMessageHandler);
-if (config.bot_opts.greetSubs) {
-    client.on('subscription', onSubHandler);
-    client.on('resub', onResubHandler);
-}
-
-client.connect();
-
 
 const containsMention = function (message) {
     const mentionRegex = new RegExp(`(?:^|[\\b@])${config.tmi_opts.identity.username.toLowerCase()}(?:\\b|$)`);
@@ -188,7 +189,7 @@ function onConnectedHandler(addr, port) {
     });
     log.logger.info(`Connected to ${addr}:${port}`);
 
-    for (channel of config.tmi_opts.channels) {
+    for (let channel of config.tmi_opts.channels) {
         autoPostLoop(channel);
     }
 }
@@ -203,3 +204,18 @@ function onNoticeHandler(channel, msgid, message) {
         }
     });
 }
+
+
+log.logger.info(`Starting ${config.tmi_opts.identity.username} bot with config %o`, {
+    config: config.bot_opts
+});
+
+client.on('connected', onConnectedHandler);
+client.on('notice', onNoticeHandler);
+client.on('message', onMessageHandler);
+if (config.bot_opts.greetSubs) {
+    client.on('subscription', onSubHandler);
+    client.on('resub', onResubHandler);
+}
+
+client.connect();
