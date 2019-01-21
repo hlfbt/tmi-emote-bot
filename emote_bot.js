@@ -159,11 +159,11 @@ const liveCheckLoop = function (channel, err, res, body) {
     channelStatus[channel].live = (body.data[0] || { type: '' }).type.toLowerCase() === 'live';
 
     if (oldLiveStatus !== channelStatus[channel].live) {
-        log.event.info(`channel ${channel} went ${oldLiveStatus ? 'offline' : 'live'}`, {
+        log.event.info(`channel ${channel} went ${channelStatus[channel].live ? 'live' : 'offline'}`, {
             label: 'channelStatus',
             data: channelStatus[channel]
         });
-        log.logger.info(`Channel ${channel} went ${oldLiveStatus ? 'OFFLINE' : 'LIVE'}`);
+        log.logger.info(`Channel ${channel} went ${channelStatus[channel].live ? 'LIVE' : 'OFFLINE'}`);
     }
 
     let timeout = config.bot_opts.autoPostDelay - (config.bot_opts.autoPostRngDelay / 2);
