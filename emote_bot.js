@@ -81,7 +81,7 @@ const autoPostLoop = function (channel) {
     let timeout = getNextAutoPost(channel) - Date.now() + 10;
     setTimeout(autoPostLoop.bind(this, channel), timeout);
 
-    log.logger.info(`Auto post sheduled for ${channel} in ${timeout}ms`);
+    log.logger.info(`Auto post scheduled for ${channel} in ${timeout}ms`);
 };
 
 const containsMention = function (message) {
