@@ -116,12 +116,12 @@ const getUserFromState = function (userstate, fallback) {
     return '';
 };
 
-const getChannelInfo = function (channelName, callback) {
+const getChannelInfo = function (channel, callback) {
     client.api({
-        url: `https://api.twitch.tv/helix/streams?user_login=${channelName.replace(/^#/, '')}`,
+        url: `https://api.twitch.tv/helix/streams?user_login=${channel.replace(/^#/, '')}`,
         method: "GET",
         headers: {
-            "Authorization": config.tmi_opts.identity.password.replace(/^oauth:/, '')
+            "Authorization": 'Bearer ' + config.tmi_opts.identity.password.replace(/^oauth:/, '')
         }
     }, function (err, res, body) {
         try {
@@ -250,8 +250,8 @@ function onConnectedHandler(addr, port) {
     log.logger.info(`Connected to ${addr}:${port}`);
 
     for (let channel of config.tmi_opts.channels) {
-        autoPostLoop(channel);
         liveCheckLoop(channel);
+        setTimeout(autoPostLoop.bind(this, channel), 500);
     }
 }
 
