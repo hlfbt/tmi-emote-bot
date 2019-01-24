@@ -70,18 +70,16 @@ const autoPostLoop = function (channel) {
         return;
     }
 
-    if (!channelStatus[channel].live) {
-        return;
-    }
-
-    if (Date.now() >= getNextAutoPost(channel)) {
+    if (channelStatus[channel].live && Date.now() >= getNextAutoPost(channel)) {
         postEmote(channel);
     }
 
     let timeout = getNextAutoPost(channel) - Date.now() + 10;
     setTimeout(autoPostLoop.bind(this, channel), timeout);
 
-    log.logger.info(`Auto post scheduled for ${channel} in ${timeout}ms`);
+    if (channelStatus[channel].live) {
+        log.logger.info(`Auto post scheduled for ${channel} in ${timeout}ms`);
+    }
 };
 
 const containsMention = function (message) {
