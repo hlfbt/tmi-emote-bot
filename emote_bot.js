@@ -211,7 +211,7 @@ function onResubHandler(channel, username, months, message, userstate, methods) 
     }
 
     let emoteRepeat = config.bot_opts.emote + ' ';
-    emoteRepeat = emoteRepeat.repeat(months - 1).trim();
+    emoteRepeat = emoteRepeat.repeat(months > 0 ? (months - 1) : 1).trim();
     username = getUserFromState(userstate, username);
 
     postEmote(channel, `${username} ${emoteRepeat}`);
