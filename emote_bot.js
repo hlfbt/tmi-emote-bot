@@ -221,7 +221,7 @@ function onResubHandler(channel, username, months, message, userstate, methods) 
         prefix += " " + (config.bot_opts["tier" + methods["plan"] + "Prefix"] || "");
     }
     if (months > 1) {
-        prefix += " " + (config.bot_opts.emote + " ").repeat(months).trim();
+        prefix += " " + (config.bot_opts.emote + " ").repeat(months - 1).trim();
     }
 
     postEmote(channel, prefix);
