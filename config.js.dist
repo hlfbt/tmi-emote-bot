@@ -30,5 +30,10 @@ config.bot_opts = {
     // Whether to post when someone (re-) subscribes, mentioning them
     "greetSubs": true,
     // Whether to reply to any mentions (@botname or just botname in message)
-    "replyMentions": true
+    "replyMentions": true,
+    // Prefixes for the different sub tiers when greeting subs
+    "tierPrimePrefix": "",
+    "tier1000Prefix": "",
+    "tier2000Prefix": "❤️",
+    "tier3000Prefix": "💕"
 };

@@ -210,11 +210,15 @@ function onResubHandler(channel, username, months, message, userstate, methods) 
         return;
     }
 
-    let emoteRepeat = config.bot_opts.emote + ' ';
-    emoteRepeat = emoteRepeat.repeat(months > 0 ? (months - 1) : 0).trim();
-    username = getUserFromState(userstate, username);
+    let prefix = getUserFromState(userstate, username);
+    if ((methods["plan"] || "").length > 0) {
+        prefix += " " + (config.bot_opts["tier" + methods["plan"] + "Prefix"] || "");
+    }
+    if (months > 1) {
+        prefix += " " + (config.bot_opts.emote + " ").repeat(months).trim();
+    }
 
-    postEmote(channel, `${username} ${emoteRepeat}`);
+    postEmote(channel, prefix);
 }
 
 function onSubHandler(channel, username, methods, message, userstate) {
@@ -233,9 +237,12 @@ function onSubHandler(channel, username, methods, message, userstate) {
         return;
     }
 
-    username = getUserFromState(userstate, username);
+    let prefix = getUserFromState(userstate, username);
+    if ((methods["plan"] || "").length > 0) {
+        prefix += " " + (config.bot_opts["tier" + methods["plan"] + "Prefix"] || "");
+    }
 
-    postEmote(channel, username);
+    postEmote(channel, prefix);
 }
 
 function onConnectedHandler(addr, port) {
