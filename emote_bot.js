@@ -210,6 +210,12 @@ function onResubHandler(channel, username, months, message, userstate, methods) 
         return;
     }
 
+    if ((userstate["msg-param-cumulative-months"] || "").match(/^[0-9]+$/)) {
+        months = +userstate["msg-param-cumulative-months"];
+    } else if ((userstate["msg-param-streak-months"] || "").match(/^[0-9]+$/)) {
+        months = +userstate["msg-param-streak-months"];
+    }
+
     let prefix = getUserFromState(userstate, username);
     if ((methods["plan"] || "").length > 0) {
         prefix += " " + (config.bot_opts["tier" + methods["plan"] + "Prefix"] || "");
