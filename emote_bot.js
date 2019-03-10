@@ -37,6 +37,14 @@ for (let channel of config.tmi_opts.channels) {
     };
 }
 
+var serverStatus = {
+    connected: false,
+    reconnectTry: 0,
+    disconnectReason: null,
+    address: null,
+    port: null
+};
+
 const postEmote = function (channel, prefix) {
     let message = config.bot_opts.emote;
 
@@ -168,6 +176,19 @@ const liveCheckLoop = function (channel, err, res, body) {
     setTimeout(liveCheckLoop.bind(this, channel), timeout);
 };
 
+const reconnectLoop = function () {
+    let retry = ++serverStatus["reconnectTry"];
+    if (retry > 10) {
+        log.logger.error('Tried to reconnect 10 times, giving up');
+        process.exit(1);
+    }
+
+    log.logger.info(`Trying to reconnect #${retry}...`);
+    client.connect();
+
+    setTimeout(reconnectLoop.bind(this), retry * 500);
+}
+
 
 function onMessageHandler(channel, userstate, message, self) {
     log.event.info(`message received in ${channel}`, {
@@ -205,6 +226,9 @@ function onResubHandler(channel, username, months, message, userstate, methods) 
             methods: methods
         }
     });
+
+    userstate = (userstate || {});
+    methods = (methods || {});
 
     if (username.toLowerCase() === config.tmi_opts.identity.username.toLowerCase()) {
         return;
@@ -252,17 +276,44 @@ function onSubHandler(channel, username, methods, message, userstate) {
 }
 
 function onConnectedHandler(addr, port) {
+    serverStatus["connected"] = true;
+    serverStatus["reconnectTry"] = 0;
+    serverStatus["address"] = addr;
+    serverStatus["port"] = port;
+
     log.event.info('connected to twitch', {
         arguments: {
             addr: addr,
             port: port
-        }
+        },
+        serverStatus: serverStatus
     });
     log.logger.info(`Connected to ${addr}:${port}`);
 
     for (let channel of config.tmi_opts.channels) {
         liveCheckLoop(channel);
         setTimeout(autoPostLoop.bind(this, channel), 500);
+    }
+}
+
+function onDisconnectedHandler(reason) {
+    let previouslyConnected = serverStatus["connected"];
+
+    serverStatus["connected"] = false;
+    serverStatus["disconnectReason"] = reason;
+    serverStatus["address"] = null;
+    serverStatus["port"] = null;
+
+    log.event.warn(`disconnected from server: ${reason}`, {
+        arguments: {
+            reason: reason
+        },
+        serverStatus: serverStatus
+    });
+    log.logger.warn(`Disconnected from server: ${reason}`);
+
+    if (previouslyConnected) {
+        reconnectLoop();
     }
 }
 
@@ -283,6 +334,7 @@ log.logger.info(`Starting ${config.tmi_opts.identity.username} bot with config %
 });
 
 client.on('connected', onConnectedHandler);
+client.on('disconnected', onDisconnectedHandler);
 client.on('notice', onNoticeHandler);
 client.on('message', onMessageHandler);
 if (config.bot_opts.greetSubs) {
