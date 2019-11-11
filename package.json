@@ -11,7 +11,7 @@
   "scripts": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tubersan/tmi-emote-bot.git"
+    "url": "git+https://github.com/hlfbt/tmi-emote-bot.git"
   },
   "keywords": [
     "tmi.js",
@@ -21,7 +21,7 @@
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/tubersan/tmi-emote-bot/issues"
+    "url": "https://github.com/hlfbt/tmi-emote-bot/issues"
   },
-  "homepage": "https://github.com/tubersan/tmi-emote-bot#readme"
+  "homepage": "https://github.com/hlfbt/tmi-emote-bot#readme"
 }
